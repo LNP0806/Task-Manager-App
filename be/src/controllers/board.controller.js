@@ -12,6 +12,19 @@ const getAllBoards = async (req, res) => {
   });
 };
 
+const createBoard = async (req, res) => {
+  const { title, description } = req.body;
+
+  const newBoard = await boardServices.createBoard({ title, description });
+
+  res.status(201).json({
+    success: true,
+    message: "Create board successfully",
+    data: newBoard,
+  });
+};
+
 module.exports = {
   getAllBoards,
+  createBoard,
 };

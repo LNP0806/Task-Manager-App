@@ -8,4 +8,6 @@ const router = express.Router();
 
 router.get("/", asyncHandlerMiddleware(boardController.getAllBoards));
 
+router.post("/", asyncHandlerMiddleware(boardController.createBoard));
+
 module.exports = router;

@@ -43,8 +43,8 @@ export default function BoardDetailPage() {
     setBoard(nextBoard)
   }
 
-  async function handleCreateCard(columnId, payload) {
-    await createCard(columnId, payload)
+  async function handleCreateCard(status, payload) {
+    await createCard(boardId, status, payload)
     await refreshBoard()
   }
 
@@ -62,8 +62,8 @@ export default function BoardDetailPage() {
     setSelectedCardId(cardId)
   }
 
-  async function handleMoveCard(cardId, targetColumnId) {
-    await moveCard(cardId, targetColumnId)
+  async function handleMoveCard(cardId, targetStatus) {
+    await moveCard(cardId, targetStatus)
     await refreshBoard()
     setSelectedCardId(cardId)
   }

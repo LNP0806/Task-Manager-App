@@ -11,8 +11,8 @@ export default function CardDetailModal({
   onSave,
 }) {
   const [title, setTitle] = useState(card.title)
-  const [description, setDescription] = useState(card.description)
-  const [columnId, setColumnId] = useState(currentColumn.id)
+  const [description, setDescription] = useState(card.description ?? '')
+  const [status, setStatus] = useState(currentColumn.status)
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -21,8 +21,8 @@ export default function CardDetailModal({
       description: description.trim(),
     })
 
-    if (columnId !== currentColumn.id) {
-      await onMove(card.id, columnId)
+    if (status !== currentColumn.status) {
+      await onMove(card.id, status)
     }
   }
 
@@ -78,11 +78,11 @@ export default function CardDetailModal({
             <select
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
               id="card-detail-status"
-              onChange={(event) => setColumnId(event.target.value)}
-              value={columnId}
+              onChange={(event) => setStatus(event.target.value)}
+              value={status}
             >
               {columns.map((column) => (
-                <option key={column.id} value={column.id}>
+                <option key={column.status} value={column.status}>
                   {column.title}
                 </option>
               ))}
