@@ -24,7 +24,42 @@ const createBoard = async (req, res) => {
   });
 };
 
+const getBoardDetailById = async (req, res) => {
+  const { id } = req.params;
+
+  const board = await boardServices.getBoardDetailById(id);
+
+  if (!board) {
+    throw new AppError("Board not found", 404);
+  }
+
+  res.json({
+    success: true,
+    message: "Get board details successfully",
+    data: board,
+  });
+};
+
+const createCard = async (req, res) => {
+  const { id } = req.params;
+  const { title, description, status } = req.body;
+
+  const newCard = await boardServices.createCard(id, {
+    title,
+    description,
+    status,
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Create card successfully",
+    data: newCard,
+  });
+};
+
 module.exports = {
   getAllBoards,
   createBoard,
+  getBoardDetailById,
+  createCard,
 };

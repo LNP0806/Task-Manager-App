@@ -55,7 +55,132 @@ const createBoard = async (data) => {
   return board;
 };
 
+const getBoardDetailById = async (id) => {
+  const boardResult = await pool.query(
+    `
+    SELECT 
+      b.id, 
+      b.title, 
+      b.description, 
+      b.created_at, 
+      b.updated_at,
+      COUNT(c.id)::int AS card_count
+    FROM boards b
+    LEFT JOIN cards c ON c.board_id = b.id
+    WHERE b.id = $1
+    GROUP BY b.id, b.title, b.description, b.created_at, b.updated_at
+    `,
+    [id],
+  );
+
+  const board = boardResult.rows[0];
+
+  if (!board) return null;
+
+  let columns = [
+    {
+      id: "todo",
+      status: "todo",
+      title: "To do",
+      cards: [],
+    },
+    {
+      id: "doing",
+      status: "doing",
+      title: "Doing",
+      cards: [],
+    },
+    {
+      id: "review",
+      status: "review",
+      title: "Review",
+      cards: [],
+    },
+    {
+      id: "done",
+      status: "done",
+      title: "Done",
+      cards: [],
+    },
+  ];
+
+  const cardResult = await pool.query(
+    `
+    SELECT 
+      id,
+      board_id,
+      title,
+      description,
+      status,
+      position,
+      created_at,
+      updated_at
+    FROM cards
+    WHERE board_id = $1
+    ORDER BY id ASC
+    `,
+    [id],
+  );
+
+  const cards = cardResult.rows;
+
+  cards.forEach((card) => {
+    const targetColumn = columns.find(
+      (column) => column.status === card.status,
+    );
+
+    if (targetColumn) {
+      targetColumn.cards.push({
+        id: card.id,
+        boardId: card.board_id,
+        title: card.title,
+        description: card.description,
+        status: card.status,
+        position: card.position,
+        createdAt: card.created_at,
+        updatedAt: card.updated_at,
+      });
+    }
+  });
+
+  return {
+    id: board.id,
+    title: board.title,
+    description: board.description,
+    createdAt: board.created_at,
+    updatedAt: board.updated_at,
+    cardCount: board.card_count,
+    columns,
+  };
+};
+
+const createCard = async (id, data) => {
+  const result = await pool.query(
+    `
+    INSERT INTO cards (title, description, status, board_id)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, board_id, title, description, status, position, created_at, updated_at
+    `,
+    [data.title.trim(), data.description.trim(), data.status.trim(), id],
+  );
+
+  const card = result.rows[0];
+
+  return {
+    id: card.id,
+    boardId: card.board_id,
+    title: card.title,
+    description: card.description,
+    status: card.status,
+    position: card.position,
+    createdAt: card.created_at,
+    updatedAt: card.updated_at,
+  };
+};
+
 module.exports = {
   getAllBoards,
   createBoard,
+  getBoardDetailById,
+  createCard,
 };

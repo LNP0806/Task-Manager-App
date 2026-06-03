@@ -1,13 +1,17 @@
 const express = require("express");
 
-const asyncHandlerMiddleware = require("../middlewares/async-handler.middleware");
+const asyncHandler = require("../middlewares/async-handler.middleware");
 
 const boardController = require("../controllers/board.controller");
 
 const router = express.Router();
 
-router.get("/", asyncHandlerMiddleware(boardController.getAllBoards));
+router.get("/", asyncHandler(boardController.getAllBoards));
 
-router.post("/", asyncHandlerMiddleware(boardController.createBoard));
+router.get("/:id", asyncHandler(boardController.getBoardDetailById));
+
+router.post("/:id/cards", asyncHandler(boardController.createCard));
+
+router.post("/", asyncHandler(boardController.createBoard));
 
 module.exports = router;
