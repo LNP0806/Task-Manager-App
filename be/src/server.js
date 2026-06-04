@@ -15,7 +15,7 @@ const startServer = async () => {
       console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
-    console.log("Datanase connected failed");
+    console.log("Database connected failed");
     console.log(error.message);
     process.exit(1);
   }
