@@ -17,9 +17,7 @@ const getAllBoards = async () => {
     `,
   );
 
-  const boards = result.rows;
-
-  const data = boards.map((board) => ({
+  const boards = result.rows.map((board) => ({
     id: board.id,
     title: board.title,
     description: board.description,
@@ -28,17 +26,19 @@ const getAllBoards = async () => {
     cardCount: board.card_count,
   }));
 
-  return data;
+  return {
+    data: boards,
+  };
 };
 
-const createBoard = async (data) => {
+const createBoard = async (payload) => {
   const result = await pool.query(
     `
     INSERT INTO boards (title, description)
     VALUES ($1, $2)
     RETURNING id, title, description, created_at, updated_at, 0::int AS card_count
     `,
-    [data.title.trim(), data.description.trim()],
+    [payload.title.trim(), payload.description.trim()],
   );
 
   const newBoard = result.rows[0];
@@ -154,14 +154,19 @@ const getBoardDetailById = async (id) => {
   };
 };
 
-const createCard = async (id, data) => {
+const createCard = async (id, payload) => {
   const result = await pool.query(
     `
     INSERT INTO cards (title, description, status, board_id)
     VALUES ($1, $2, $3, $4)
     RETURNING id, board_id, title, description, status, position, created_at, updated_at
     `,
-    [data.title.trim(), data.description.trim(), data.status.trim(), id],
+    [
+      payload.title.trim(),
+      payload.description.trim(),
+      payload.status.trim(),
+      id,
+    ],
   );
 
   const card = result.rows[0];

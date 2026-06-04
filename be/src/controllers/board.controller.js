@@ -1,27 +1,21 @@
 const AppError = require("../utils/app-error");
 
+const { successResponse } = require("../utils/api-response");
+
 const boardServices = require("../services/board.service");
 
 const getAllBoards = async (req, res) => {
-  const boards = await boardServices.getAllBoards();
+  const result = await boardServices.getAllBoards();
 
-  res.json({
-    success: true,
-    message: "Get boards successfully",
-    data: boards,
-  });
+  return successResponse(res, "Get boadrs successfully", result.data, 200);
 };
 
 const createBoard = async (req, res) => {
-  const { title, description } = req.body;
+  const { title, description } = req.validateBody;
 
   const newBoard = await boardServices.createBoard({ title, description });
 
-  res.status(201).json({
-    success: true,
-    message: "Create board successfully",
-    data: newBoard,
-  });
+  return successResponse(res, "Create board successfully", newBoard, 201);
 };
 
 const getBoardDetailById = async (req, res) => {
@@ -33,16 +27,12 @@ const getBoardDetailById = async (req, res) => {
     throw new AppError("Board not found", 404);
   }
 
-  res.json({
-    success: true,
-    message: "Get board details successfully",
-    data: board,
-  });
+  return successResponse(res, "Get board successfully", board);
 };
 
 const createCard = async (req, res) => {
   const { id } = req.params;
-  const { title, description, status } = req.body;
+  const { title, description, status } = req.validateBody;
 
   const newCard = await boardServices.createCard(id, {
     title,
@@ -50,11 +40,7 @@ const createCard = async (req, res) => {
     status,
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Create card successfully",
-    data: newCard,
-  });
+  return successResponse(res, "Create card successfully", newCard, 201);
 };
 
 module.exports = {
