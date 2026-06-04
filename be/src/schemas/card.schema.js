@@ -52,14 +52,14 @@ const moveCardSchema = z.object({
   targetStatus: z
     .enum(["todo", "doing", "review", "done"], {
       invalid_type_error: "Target status must be todo, doing, review or done",
-    })
-    .optional(),
+    }),
 
   position: z
     .number({
       invalid_type_error: "Position must be a number",
     })
-    .min(0, "Position must be a positive number"),
+    .min(0, "Position must be a positive number")
+    .optional(),
 });
 
 module.exports = {

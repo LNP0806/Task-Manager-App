@@ -29,24 +29,24 @@ export default function CardDetailModal({
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm"
       role="dialog"
     >
       <form
-        className="w-full max-w-2xl rounded-lg bg-white p-5 shadow-xl sm:p-6"
+        className="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-950/20 sm:p-6"
         onSubmit={handleSubmit}
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <p className="text-sm font-medium text-teal-700">
+            <p className="text-sm font-bold text-teal-700">
               {currentColumn.title}
             </p>
-            <h2 className="mt-1 text-xl font-semibold text-slate-950">
+            <h2 className="mt-1 text-xl font-bold text-slate-950">
               Card details
             </h2>
           </div>
           <button
-            className="rounded-md px-2 py-1 text-2xl leading-none text-slate-500 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
+            className="rounded-md px-2 py-1 text-2xl leading-none text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
             onClick={onClose}
             type="button"
             aria-label="Close card details"
@@ -72,11 +72,11 @@ export default function CardDetailModal({
             value={description}
           />
           <label className="block" htmlFor="card-detail-status">
-            <span className="mb-1 block text-sm font-medium text-slate-700">
+            <span className="mb-1.5 block text-sm font-semibold text-slate-700">
               Status
             </span>
             <select
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition hover:border-slate-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
               id="card-detail-status"
               onChange={(event) => setStatus(event.target.value)}
               value={status}

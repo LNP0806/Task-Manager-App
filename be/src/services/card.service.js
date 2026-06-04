@@ -34,6 +34,10 @@ const updateCard = async (id, payload) => {
 
   const card = result.rows[0];
 
+  if (!card) {
+    return null;
+  }
+
   return {
     id: card.id,
     boardId: card.board_id,
@@ -49,7 +53,7 @@ const updateCard = async (id, payload) => {
 const deleteCard = async (id) => {
   const result = await pool.query(
     `
-    DELETE cards
+    DELETE FROM cards
     WHERE id = $1
     RETURNING id, board_id, title, description, status, position, created_at, updated_at
     `,
@@ -57,6 +61,10 @@ const deleteCard = async (id) => {
   );
 
   const card = result.rows[0];
+
+  if (!card) {
+    return null;
+  }
 
   return {
     id: card.id,
@@ -71,6 +79,36 @@ const deleteCard = async (id) => {
 };
 
 const moveCard = async (id, payload) => {
+  const currentResult = await pool.query(
+    `
+    SELECT board_id
+    FROM cards
+    WHERE id = $1
+    `,
+    [id],
+  );
+
+  const currentCard = currentResult.rows[0];
+
+  if (!currentCard) {
+    return null;
+  }
+
+  let nextPosition = payload.position;
+
+  if (nextPosition === undefined) {
+    const positionResult = await pool.query(
+      `
+      SELECT COALESCE(MAX(position) + 1, 0)::int AS next_position
+      FROM cards
+      WHERE board_id = $1 AND status = $2 AND id <> $3
+      `,
+      [currentCard.board_id, payload.targetStatus, id],
+    );
+
+    nextPosition = positionResult.rows[0].next_position;
+  }
+
   const result = await pool.query(
     `
     UPDATE cards
@@ -78,7 +116,7 @@ const moveCard = async (id, payload) => {
     WHERE id = $3
     RETURNING id, board_id, title, description, status, position, created_at, updated_at
     `,
-    [payload.targetStatus, payload.position, id],
+    [payload.targetStatus, nextPosition, id],
   );
 
   const card = result.rows[0];

@@ -1,24 +1,24 @@
-import { Outlet } from 'react-router-dom'
+import { Link, Outlet } from 'react-router-dom'
 
 export default function AppLayout() {
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-teal-700">
+    <div className="flex min-h-screen flex-col bg-[linear-gradient(180deg,#eef6f5_0%,#f7f8fb_34%,#f5f7fa_100%)] text-slate-900 md:h-screen md:overflow-hidden">
+      <header className="shrink-0 border-b border-slate-200/80 bg-white/90 shadow-sm shadow-slate-200/60 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+          <Link
+            className="block rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
+            to="/boards"
+          >
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-teal-700">
               Task Board
             </p>
-            <h1 className="text-xl font-semibold text-slate-950 sm:text-2xl">
+            <h1 className="text-xl font-bold text-slate-950 sm:text-2xl">
               Kanban Workspace
             </h1>
-          </div>
-          <span className="rounded-full border border-slate-200 px-3 py-1 text-sm text-slate-600">
-            Mock mode
-          </span>
+          </Link>
         </div>
       </header>
-      <main className="mx-auto min-h-[calc(100vh-81px)] max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 sm:px-6 md:min-h-0 lg:px-8">
         <Outlet />
       </main>
     </div>

@@ -21,10 +21,10 @@ export default function CreateBoardForm({ onCreate }) {
 
   return (
     <form
-      className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-lg border border-slate-200/80 bg-white/95 p-5 shadow-lg shadow-slate-200/70"
       onSubmit={handleSubmit}
     >
-      <h2 className="text-lg font-semibold text-slate-950">Create board</h2>
+      <h2 className="text-lg font-bold text-slate-950">Create board</h2>
       <div className="mt-4 space-y-4">
         <Field
           id="board-title"
