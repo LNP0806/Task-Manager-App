@@ -2,6 +2,7 @@ const express = require("express");
 
 const boardRoutes = require("./routes/board.routes");
 const cardRoutes = require("./routes/card.routes");
+const authRoutes = require("./routes/auth.routes");
 
 const notFoundMiddleware = require("./middlewares/not-found.middleware");
 const requestLoggerMiddleware = require("./middlewares/request-logger.middleware");
@@ -27,6 +28,15 @@ app.use((req, res, next) => {
 
   return next();
 });
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Backend server is running",
+  });
+});
+
+app.use("/auth", authRoutes);
 
 app.use("/boards", boardRoutes);
 app.use("/api/boards", boardRoutes);

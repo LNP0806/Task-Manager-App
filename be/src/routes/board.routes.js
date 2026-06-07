@@ -2,6 +2,8 @@ const express = require("express");
 
 const asyncHandler = require("../middlewares/async-handler.middleware");
 
+const {requiredAuth} = require("../middlewares/auth.middleware");
+
 const {
   validateBody,
   validateQuery,
@@ -13,6 +15,8 @@ const { createCardSchema } = require("../schemas/card.schema");
 const boardController = require("../controllers/board.controller");
 
 const router = express.Router();
+
+router.use(requiredAuth);
 
 router.get("/", asyncHandler(boardController.getAllBoards));
 

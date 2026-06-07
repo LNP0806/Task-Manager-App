@@ -1,6 +1,6 @@
 const pool = require("../config/db");
 
-const getAllBoards = async () => {
+const getAllBoards = async (userId) => {
   const result = await pool.query(
     `
     SELECT 
@@ -12,13 +12,16 @@ const getAllBoards = async () => {
       COUNT(c.id)::int AS card_count
     FROM boards b
     LEFT JOIN cards c ON c.board_id = b.id
-    GROUP BY b.id, b.title, b.description, b.created_at, b.updated_at
+    WHERE b.user_id = $1
+    GROUP BY b.id, b.user_id, b.title, b.description, b.created_at, b.updated_at
     ORDER BY id ASC
     `,
+    [userId],
   );
 
   const boards = result.rows.map((board) => ({
     id: board.id,
+    userId: board.user_id,
     title: board.title,
     description: board.description,
     createdAt: board.created_at,
@@ -31,20 +34,21 @@ const getAllBoards = async () => {
   };
 };
 
-const createBoard = async (payload) => {
+const createBoard = async (userId, payload) => {
   const result = await pool.query(
     `
-    INSERT INTO boards (title, description)
-    VALUES ($1, $2)
-    RETURNING id, title, description, created_at, updated_at, 0::int AS card_count
+    INSERT INTO boards (user_id, title, description)
+    VALUES ($1, $2, $3)
+    RETURNING id, user_id, title, description, created_at, updated_at, 0::int AS card_count
     `,
-    [payload.title.trim(), payload.description.trim()],
+    [userId, payload.title.trim(), payload.description.trim()],
   );
 
   const newBoard = result.rows[0];
 
   const board = {
     id: newBoard.id,
+    userId: newBoard.user_id,
     title: newBoard.title,
     description: newBoard.description,
     createdAt: newBoard.created_at,
@@ -55,7 +59,7 @@ const createBoard = async (payload) => {
   return board;
 };
 
-const getBoardDetailById = async (id) => {
+const getBoardDetailById = async (id, userId) => {
   const boardResult = await pool.query(
     `
     SELECT 
@@ -67,10 +71,10 @@ const getBoardDetailById = async (id) => {
       COUNT(c.id)::int AS card_count
     FROM boards b
     LEFT JOIN cards c ON c.board_id = b.id
-    WHERE b.id = $1
-    GROUP BY b.id, b.title, b.description, b.created_at, b.updated_at
+    WHERE b.id = $1 AND b.user_id = $2
+    GROUP BY b.id, b.user_id, b.title, b.description, b.created_at, b.updated_at
     `,
-    [id],
+    [id, userId],
   );
 
   const board = boardResult.rows[0];
@@ -145,6 +149,7 @@ const getBoardDetailById = async (id) => {
 
   return {
     id: board.id,
+    userId: board.user_id,
     title: board.title,
     description: board.description,
     createdAt: board.created_at,
@@ -154,7 +159,24 @@ const getBoardDetailById = async (id) => {
   };
 };
 
-const createCard = async (id, payload) => {
+const isBoardBelongsToUser = async (boardId, userId) => {
+  const result = await pool.query(
+    `
+    SELECT id FROM boards WHERE id = $1 AND user_id = $2
+    `,
+    [boardId, userId],
+  );
+
+  return result.rowCount > 0;
+}
+
+const createCard = async (id, userId, payload) => {
+  const isBelongsToUser = await isBoardBelongsToUser(id, userId);
+
+  if (!isBelongsToUser) {
+    throw new Error("Board not found");
+  }
+
   const result = await pool.query(
     `
     INSERT INTO cards (title, description, status, board_id)

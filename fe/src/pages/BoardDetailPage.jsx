@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import CardDetailModal from '../components/cards/CardDetailModal'
 import KanbanColumn from '../components/columns/KanbanColumn'
+import { useAuth } from '../context/useAuth'
 import { getBoardById } from '../services/boardService'
 import {
   createCard,
@@ -12,16 +13,40 @@ import {
 
 export default function BoardDetailPage() {
   const { boardId } = useParams()
+  const { logout } = useAuth()
   const [board, setBoard] = useState(null)
+  const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCardId, setSelectedCardId] = useState(null)
 
   useEffect(() => {
-    getBoardById(boardId).then((data) => {
-      setBoard(data)
-      setIsLoading(false)
-    })
-  }, [boardId])
+    let isMounted = true
+
+    getBoardById(boardId)
+      .then((data) => {
+        if (isMounted) {
+          setBoard(data)
+        }
+      })
+      .catch((loadError) => {
+        if (loadError.status === 401) {
+          logout()
+        }
+
+        if (isMounted) {
+          setError(loadError.message || 'Unable to load board')
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false)
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [boardId, logout])
 
   const selectedCardContext = (() => {
     if (!board || !selectedCardId) {
@@ -44,28 +69,44 @@ export default function BoardDetailPage() {
   }
 
   async function handleCreateCard(status, payload) {
-    await createCard(boardId, status, payload)
-    await refreshBoard()
+    try {
+      await createCard(boardId, status, payload)
+      await refreshBoard()
+    } catch (cardError) {
+      setError(cardError.message || 'Unable to create card')
+    }
   }
 
   async function handleDeleteCard(cardId) {
-    await deleteCard(cardId)
-    if (selectedCardId === cardId) {
-      setSelectedCardId(null)
+    try {
+      await deleteCard(cardId)
+      if (selectedCardId === cardId) {
+        setSelectedCardId(null)
+      }
+      await refreshBoard()
+    } catch (cardError) {
+      setError(cardError.message || 'Unable to delete card')
     }
-    await refreshBoard()
   }
 
   async function handleSaveCard(cardId, payload) {
-    await updateCard(cardId, payload)
-    await refreshBoard()
-    setSelectedCardId(cardId)
+    try {
+      await updateCard(cardId, payload)
+      await refreshBoard()
+      setSelectedCardId(cardId)
+    } catch (cardError) {
+      setError(cardError.message || 'Unable to save card')
+    }
   }
 
   async function handleMoveCard(cardId, targetStatus) {
-    await moveCard(cardId, targetStatus)
-    await refreshBoard()
-    setSelectedCardId(cardId)
+    try {
+      await moveCard(cardId, targetStatus)
+      await refreshBoard()
+      setSelectedCardId(cardId)
+    } catch (cardError) {
+      setError(cardError.message || 'Unable to move card')
+    }
   }
 
   if (isLoading) {
@@ -80,7 +121,7 @@ export default function BoardDetailPage() {
     return (
       <div className="rounded-lg border border-slate-200/80 bg-white/95 p-6 shadow-sm">
         <h2 className="text-xl font-bold text-slate-950">
-          Board not found
+          {error || 'Board not found'}
         </h2>
         <Link
           className="mt-4 inline-flex items-center justify-center rounded-md bg-teal-700 px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
@@ -111,6 +152,11 @@ export default function BoardDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:min-h-0 md:flex-1 md:grid-cols-[repeat(auto-fit,minmax(0,1fr))]">
+        {error ? (
+          <p className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700 md:col-span-full">
+            {error}
+          </p>
+        ) : null}
         {board.columns.map((column) => (
           <KanbanColumn
             column={column}
