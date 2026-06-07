@@ -20,13 +20,20 @@ app.use((req, res, next) => {
     "Access-Control-Allow-Methods",
     "GET,POST,PATCH,DELETE,OPTIONS",
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
   }
 
   return next();
+});
+
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "Backend server is running",
+  });
 });
 
 app.get("/health", (req, res) => {
